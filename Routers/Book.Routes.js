@@ -3,23 +3,34 @@ import express from "express";
 import { bookModel } from "../Models/Book.model.js";
 import { AuthMiddleware } from "../Middleware/Auth.Middleware.js";
 import { validateBook } from "../Middleware/Validator.middlewares.js";
-
+import { validationResult } from 'express-validator';
 export const bookRoutes = express.Router();
 
 
 bookRoutes.get("/", async (req, res) => {
     const page = parseInt(req.query._page) || 1;
-    const limit = parseInt(req.query._limit) || 1;
+    const limit = parseInt(req.query._limit) || 5; // Increase default limit for better pagination
     const startIndex = (page - 1) * limit;
 
     try {
-        const books = await bookModel.find().limit(limit).skip(startIndex);
+        let query = {};
+
+        if (req.query.year) {
+            query.year = req.query.year;
+        }
+        if (req.query.author) {
+            const authorName = req.query.author.toLowerCase();
+            query.author = { $regex: authorName, $options: 'i' };
+        }
+        
+        
+
+        const books = await bookModel.find(query).limit(limit).skip(startIndex);
         res.json(books);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
-
 
 bookRoutes.post("/add", AuthMiddleware,validateBook ,async(req,res)=>{
     const errors = validationResult(req);

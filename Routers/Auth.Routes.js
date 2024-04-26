@@ -59,6 +59,8 @@ AuthRoutes.post("/login",validateLogin,async (req,res) =>{
                   });
                }
             });
+        }else{
+            return res.json("users doesn't exist")
         }
 
     } catch (error) {
