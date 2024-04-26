@@ -2,6 +2,7 @@
 import express from "express";
 import { bookModel } from "../Models/Book.model.js";
 import { AuthMiddleware } from "../Middleware/Auth.Middleware.js";
+import { validateBook } from "../Middleware/Validator.middlewares.js";
 
 export const bookRoutes = express.Router();
 
@@ -20,7 +21,11 @@ bookRoutes.get("/", async (req, res) => {
 });
 
 
-bookRoutes.post("/add", AuthMiddleware ,async(req,res)=>{
+bookRoutes.post("/add", AuthMiddleware,validateBook ,async(req,res)=>{
+    const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array()[0].msg });
+  }
     try {
         const book = await bookModel.create(req.body)
         await book.save();

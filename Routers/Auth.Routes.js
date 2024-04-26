@@ -1,12 +1,17 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
-
+import { validationResult } from 'express-validator';
 import { usersModel } from "../Models/Auth.model.js";
+import { validateLogin, validateRegistration } from "../Middleware/Validator.middlewares.js";
 
 export const AuthRoutes = express.Router();
 
-AuthRoutes.post("/register",async (req,res)=>{
+AuthRoutes.post("/register",validateRegistration,async (req,res)=>{
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array()[0].msg });
+    }
     try {
         const {name,email,password} = req.body;
         
@@ -30,7 +35,11 @@ AuthRoutes.post("/register",async (req,res)=>{
 })
 
 
-AuthRoutes.post("/login",async (req,res) =>{
+AuthRoutes.post("/login",validateLogin,async (req,res) =>{
+    const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array()[0].msg });
+  }
     try {
         const {email,password} = req.body;
         
