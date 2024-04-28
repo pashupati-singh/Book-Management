@@ -5,32 +5,12 @@
  *   description: Book management APIs
  */
 
-// /**
-//  * @swagger
-//  *  components:
-//  *    schemas:
-//  *     Book:
-//  *       type: object
-//  *       properties:
-//  *          title:
-//  *            type: string
-//  *            description: The title of the book.
-//  *          author:
-//  *            type: string
-//  *            description: The author of the book.
-//  *          year:
-//  *            type: integer
-//  *            description: The year of publication of the book.
-//  *       required:
-//  *        - title
-//  *        - author
-//  *        - year
-//  *   securitySchemes:
-//  *     Bearer:
-//  *        type: http
-//  *        scheme: bearer
-//  */
 
+import express from "express";
+import { AuthMiddleware } from "../Middleware/Auth.Middleware.js";
+import { validateBook } from "../Middleware/Validator.middlewares.js";
+import { bookAdd, bookDelete, bookGet, bookUpdate } from "../Controller/Book.controller.js";
+export const bookRoutes = express.Router();
 
 /**
  * @swagger
@@ -59,11 +39,6 @@
  */
 
 
-import express from "express";
-import { AuthMiddleware } from "../Middleware/Auth.Middleware.js";
-import { validateBook } from "../Middleware/Validator.middlewares.js";
-import { bookAdd, bookDelete, bookGet, bookUpdate } from "../Controller/Book.controller.js";
-export const bookRoutes = express.Router();
 
 /**
  * @swagger

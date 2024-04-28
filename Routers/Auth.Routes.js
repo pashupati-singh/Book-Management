@@ -1,9 +1,8 @@
 
 import express from "express";
-import {loginUser, registerUser} from "../Controller/Auth.controller.js"
+import {getUsers, loginUser, registerUser} from "../Controller/Auth.controller.js"
 import { validateLogin, validateRegistration } from "../Middleware/Validator.middlewares.js";
 import dotenv from "dotenv";
-import { usersModel } from "../Models/Auth.model.js";
 dotenv.config();
 
 export const AuthRoutes = express.Router();
@@ -96,14 +95,7 @@ export const AuthRoutes = express.Router();
  */
 
 
-AuthRoutes.get('/', async (req, res) => {
-    try {
-        const users = await usersModel.find();
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+AuthRoutes.get('/',getUsers);
 
 
 AuthRoutes.post("/register",validateRegistration, registerUser)
