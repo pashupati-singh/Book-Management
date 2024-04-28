@@ -7,6 +7,8 @@ This server-side application provides endpoints for managing books and user auth
 
 deployed link : https://book-management-2.onrender.com/ (On Render)
 
+swagger documentation link : https://book-management-2.onrender.com/docs/
+
 ## Authentication and Authorization
 Users can register and login to access the book management functionalities. JWT tokens are used for authentication, and bcrypt is employed to hash passwords before storing them in the database.
 
