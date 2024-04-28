@@ -3,6 +3,10 @@
 ## Book Management Server
 This server-side application provides endpoints for managing books and user authentication/authorization.
 
+## Deploy
+
+deployed link : https://book-management-2.onrender.com/ (On Render)
+
 ## Authentication and Authorization
 Users can register and login to access the book management functionalities. JWT tokens are used for authentication, and bcrypt is employed to hash passwords before storing them in the database.
 
