@@ -1,11 +1,14 @@
 
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 export const AuthMiddleware = async(req,res,next) =>{
   
   try {
 const token = req.headers.authorization?.split(" ")[1];
-    jwt.verify(token, 'privateKey', async(err, decoded)=> {
+    jwt.verify(token, process.env.KEY, async(err, decoded)=> {
         if(err) {
           console.log(err);
           return res.json({msg:"Restricted Area"})

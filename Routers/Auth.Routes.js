@@ -1,69 +1,116 @@
+
 import express from "express";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken"
-import { validationResult } from 'express-validator';
-import { usersModel } from "../Models/Auth.model.js";
+import {loginUser, registerUser} from "../Controller/Auth.controller.js"
 import { validateLogin, validateRegistration } from "../Middleware/Validator.middlewares.js";
+import dotenv from "dotenv";
+import { usersModel } from "../Models/Auth.model.js";
+dotenv.config();
 
 export const AuthRoutes = express.Router();
 
-AuthRoutes.post("/register",validateRegistration,async (req,res)=>{
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array()[0].msg });
-    }
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: Operations related to users
+ */
+
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *   User:
+ *    type: object
+ *    properties:
+ *      _id:
+ *       type: string
+ *       description: The ID of the user.
+ *      name:
+ *       type: string
+ *       description: The name of the user.
+ *      email:
+ *       type: string
+ *       description: The email address of the user.
+ *      password:
+ *        type: string
+ *        description: The password of the user.
+ *    required:
+ *     - name
+ *     - email
+ *     - password
+ */
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: A list of users
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /users/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: Successfully registered
+ *       400:
+ *         description: Bad request
+ */
+
+/**
+ * @swagger
+ * /users/login:
+ *   post:
+ *     summary: Login user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
+
+
+AuthRoutes.get('/', async (req, res) => {
     try {
-        const {name,email,password} = req.body;
-        
-        const user = await usersModel.findOne({email})
-        if(user){
-            return res.json({msg:"Email already exist",email})
-        }else{
-            bcrypt.hash(password, 5, async (err, hash)=> {
-               if(err){
-                return res.json({err})
-               }else if(hash){
-                const user = new usersModel({name,email,password:hash});
-                await user.save();
-                res.json({msg : "Successfully register"})
-               }          
-            });
-        }
+        const users = await usersModel.find();
+        res.json(users);
     } catch (error) {
-        res.json({error})
+        res.status(500).json({ error: error.message });
     }
-})
+});
 
 
-AuthRoutes.post("/login",validateLogin,async (req,res) =>{
-    const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array()[0].msg });
-  }
-    try {
-        const {email,password} = req.body;
-        
-        const user = await usersModel.findOne({email});
+AuthRoutes.post("/register",validateRegistration, registerUser)
 
-        if(user){
-            bcrypt.compare(password, user.password, async(err, result)=>{
-               if(err){
-                return res.json("Invalid I'd or Password")
-               }else if(result){
-                jwt.sign({ userID:user._id }, "privateKey", async(err, token)=> {
-                    if(err){
-                        return res.json({err})
-                    }else if(token){
-                        return res.json({msg : "Login successfully" , token , name:user.name})
-                    }
-                  });
-               }
-            });
-        }else{
-            return res.json("users doesn't exist")
-        }
 
-    } catch (error) {
-        res.json({error})
-    }
-})
+AuthRoutes.post("/login", validateLogin,loginUser );
+  

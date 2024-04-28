@@ -1,86 +1,193 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Books
+ *   description: Book management APIs
+ */
+
+// /**
+//  * @swagger
+//  *  components:
+//  *    schemas:
+//  *     Book:
+//  *       type: object
+//  *       properties:
+//  *          title:
+//  *            type: string
+//  *            description: The title of the book.
+//  *          author:
+//  *            type: string
+//  *            description: The author of the book.
+//  *          year:
+//  *            type: integer
+//  *            description: The year of publication of the book.
+//  *       required:
+//  *        - title
+//  *        - author
+//  *        - year
+//  *   securitySchemes:
+//  *     Bearer:
+//  *        type: http
+//  *        scheme: bearer
+//  */
+
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Book:
+ *       type: object
+ *       properties:
+ *          title:
+ *            type: string
+ *            description: The title of the book.
+ *          author:
+ *            type: string
+ *            description: The author of the book.
+ *          year:
+ *            type: integer
+ *            description: The year of publication of the book.
+ *       required:
+ *        - title
+ *        - author
+ *        - year
+ *   securitySchemes:
+ *     Bearer:
+ *        type: http
+ *        scheme: bearer
+ */
+
 
 import express from "express";
-import { bookModel } from "../Models/Book.model.js";
 import { AuthMiddleware } from "../Middleware/Auth.Middleware.js";
 import { validateBook } from "../Middleware/Validator.middlewares.js";
-import { validationResult } from 'express-validator';
+import { bookAdd, bookDelete, bookGet, bookUpdate } from "../Controller/Book.controller.js";
 export const bookRoutes = express.Router();
 
+/**
+ * @swagger
+ * /books:
+ *   get:
+ *     summary: Get a list of books
+ *     tags: [Books]
+ *     parameters:
+ *       - in: query
+ *         name: _page
+ *         schema:
+ *           type: integer
+ *         description: Page number for pagination (default is 1)
+ *       - in: query
+ *         name: _limit
+ *         schema:
+ *           type: integer
+ *         description: Maximum number of books per page (default is 5)
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: string
+ *         description: Filter books by year
+ *       - in: query
+ *         name: author
+ *         schema:
+ *           type: string
+ *         description: Filter books by author (case-insensitive)
+ *     responses:
+ *       200:
+ *         description: A list of books
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Book'
+ *       500:
+ *         description: Internal server error
+ */
 
-bookRoutes.get("/", async (req, res) => {
-    const page = parseInt(req.query._page) || 1;
-    const limit = parseInt(req.query._limit) || 5; // Increase default limit for better pagination
-    const startIndex = (page - 1) * limit;
+/**
+ * @swagger
+ * /books/add:
+ *   post:
+ *     summary: Add a new book
+ *     tags: [Books]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Book'
+ *     security:
+ *       - Bearer: []
+ *     responses:
+ *       200:
+ *         description: Book added successfully
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 
-    try {
-        let query = {};
+/**
+ * @swagger
+ * /books/delete/{id}:
+ *   delete:
+ *     summary: Delete a book by ID
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Book ID 
+ *     security:
+ *       - Bearer: []
+ *     responses:
+ *       200:
+ *         description: Book deleted successfully
+ *       404:
+ *         description: Book not found or you don't have permission to delete this book
+ *       500:
+ *         description: Internal server error
+ */
 
-        if (req.query.year) {
-            query.year = req.query.year;
-        }
-        if (req.query.author) {
-            const authorName = req.query.author.toLowerCase();
-            query.author = { $regex: authorName, $options: 'i' };
-        }
-        
-        
-
-        const books = await bookModel.find(query).limit(limit).skip(startIndex);
-        res.json(books);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-bookRoutes.post("/add", AuthMiddleware,validateBook ,async(req,res)=>{
-    const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array()[0].msg });
-  }
-    try {
-        const book = await bookModel.create(req.body)
-        await book.save();
-        res.json({msg:"Book Added"})
-     } catch (error) {
-      res.json({error})
-     }
-})
-
-bookRoutes.delete("/delete/:id", AuthMiddleware ,async(req,res)=>{
-    const {userID} = req.body;
-    const {id} = req.params;
-
-    try {
-        const book = await bookModel.findOne({ _id: id, userID });
-
-        if (!book) {
-            return res.status(404).json({ msg: "Book not found or you don't have permission to delete this book." });
-        }
-
-        await bookModel.findByIdAndDelete(id);
-        res.json({ msg: "Book deleted", book });
-     } catch (error) {
-      res.json({error})
-     }
-})
-
-
-bookRoutes.patch("/update/:id", AuthMiddleware ,async(req,res)=>{
-    const { userID } = req.body;
-    const { id } = req.params;
-
-    try {
-        const book = await bookModel.findOneAndUpdate({ _id: id, userID }, req.body, { new: true });
-
-        if (!book) {
-            return res.status(404).json({ msg: "Book not found or you don't have permission to update this book." });
-        }
-
-        res.json({ msg: "Book updated successfully", book });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-})
+/**
+ * @swagger
+ * /books/update/{id}:
+ *   put:
+ *     summary: Update a book by ID
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Book ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Book'
+ *     security:
+ *       - Bearer: []
+ *     responses:
+ *       200:
+ *         description: Book updated successfully
+ *       404:
+ *         description: Book not found or you don't have permission to update this book
+ *       500:
+ *         description: Internal server error
+ */
 
 
+bookRoutes.get("/", bookGet)
 
+bookRoutes.post("/add", AuthMiddleware,validateBook ,bookAdd)
+
+bookRoutes.delete("/delete/:id", AuthMiddleware ,bookDelete)
+
+
+bookRoutes.put("/update/:id", AuthMiddleware ,bookUpdate)
