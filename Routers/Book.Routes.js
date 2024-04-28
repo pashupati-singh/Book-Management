@@ -155,7 +155,7 @@ export const bookRoutes = express.Router();
 /**
  * @swagger
  * /books/update/{id}:
- *   put:
+ *   patch:
  *     summary: Update a book by ID
  *     tags: [Books]
  *     parameters:
@@ -190,4 +190,4 @@ bookRoutes.post("/add", AuthMiddleware,validateBook ,bookAdd)
 bookRoutes.delete("/delete/:id", AuthMiddleware ,bookDelete)
 
 
-bookRoutes.put("/update/:id", AuthMiddleware ,bookUpdate)
+bookRoutes.patch("/update/:id", AuthMiddleware ,bookUpdate)

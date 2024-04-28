@@ -22,9 +22,6 @@ export const AuthRoutes = express.Router();
  *   User:
  *    type: object
  *    properties:
- *      _id:
- *       type: string
- *       description: The ID of the user.
  *      name:
  *       type: string
  *       description: The name of the user.
