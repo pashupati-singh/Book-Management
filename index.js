@@ -17,23 +17,6 @@ app.get('/',(req,res)=>{
 })
 
 
-// const options = {
-//   definition: {
-//     openapi: "3.0.0",
-//     info: {
-//       title: "Book Management Documantation",
-//       version: "1.0.0",
-//       description: "API Documentation",
-//     },
-//     servers: [
-//       {
-//         url: "http://localhost:8080",
-//       },
-//     ],
-//   },
-//   apis: ["./Routers/*.js"], 
-// };
-
 const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
@@ -45,12 +28,15 @@ const swaggerDefinition = {
       }
   },
   servers: [
-      {
-          url: 'http://localhost:8080',
-          description: 'Local server'
-      },
-      // Add more server options if needed
-  ],
+    {
+        url: 'http://localhost:8080',
+        description: 'Local server'
+    },
+    {
+        url: 'https://book-management-2.onrender.com/',
+        description: 'Deployed server'
+    }
+],
   components: {
       securitySchemes: {
           bearerAuth: {
@@ -67,19 +53,15 @@ const swaggerDefinition = {
 if (process.env.NODE_ENV !== 'test') {
   const swaggerSpec = swaggerJsdoc({ swaggerDefinition, apis: ['./Routers/*.js'] });
 
-  // Expose swagger.json
+  
   app.get('/swagger.json', (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.send(swaggerSpec);
   });
 
-  // Setup Swagger UI
+  
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }
-
-// const specs = swaggerJsdoc(options);
-
-// app.use('/docs',swaggerUi.serve,swaggerUi.setup(specs))
 
 
 app.listen(8080,async ()=>{
